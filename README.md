@@ -10,7 +10,7 @@ go mod init module-name
 ```
 Install the library with the command below:
 ```
-go get github.com/ahmdyaasiin/ub-auth-without-notification
+go get -u github.com/ahmdyaasiin/ub-auth-without-notification
 ```
 
 ## Quickstart

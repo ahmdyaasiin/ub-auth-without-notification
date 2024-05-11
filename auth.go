@@ -1,4 +1,4 @@
-package main
+package ub_auth
 
 import (
 	"encoding/base64"

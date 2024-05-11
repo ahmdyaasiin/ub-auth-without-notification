@@ -1,7 +1,7 @@
 # Brawijaya University Authentication Without Notification
 
 ## Overview
-This library helps make it easier to check if someone is really a student or staff at Universitas Brawijaya. It lets developers quickly confirm someone's identity using their UB email or student ID number (NIM).
+This library helps make it easier to check if someone is really a student at Universitas Brawijaya. It lets developers quickly confirm someone's identity using their UB email or student ID number (NIM).
 
 ## Installation
 Create a new directory for your project and change into it. Next, initialize your project using Go modules by running the following command in your terminal:

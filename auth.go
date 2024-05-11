@@ -2,7 +2,6 @@ package ub_auth
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -11,14 +10,23 @@ import (
 )
 
 type StudentDetails struct {
-	NIM          string
-	FullName     string
-	Email        string
-	Fakultas     string
-	ProgramStudi string
+	NIM          string `json:"nim"`
+	FullName     string `json:"full_name"`
+	Email        string `json:"email"`
+	Fakultas     string `json:"fakultas"`
+	ProgramStudi string `json:"program_studi"`
 }
 
-func AuthUB(username, password string) (StudentDetails, error) {
+type ResponseDetails struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+func (r *ResponseDetails) Error() string {
+	return r.Message
+}
+
+func AuthUB(username, password string) (*StudentDetails, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", "https://brone.ub.ac.id/my/", nil)
 	if err != nil {
@@ -103,10 +111,10 @@ func AuthUB(username, password string) (StudentDetails, error) {
 	if !strings.Contains(r, "SAMLResponse") {
 		if strings.Contains(r, "Invalid username or password.") {
 
-			return StudentDetails{}, errors.New("invalid credential")
+			return &StudentDetails{}, &ResponseDetails{401, "Invalid username or password"}
 		} else {
 
-			return StudentDetails{}, errors.New("unexpected error")
+			return &StudentDetails{}, &ResponseDetails{500, "Unexpected error"}
 		}
 	}
 
@@ -123,10 +131,10 @@ func AuthUB(username, password string) (StudentDetails, error) {
 	nim := getBetween(`<saml:Attribute FriendlyName="nim" Name="nim" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"><saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">`, "</saml", decodedSamlResponse)
 	fullName := getBetween(`<saml:Attribute FriendlyName="fullName" Name="fullName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"><saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">`, "</saml", decodedSamlResponse)
 	email := getBetween(`<saml:Attribute FriendlyName="email" Name="email" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"><saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">`, "</saml", decodedSamlResponse)
-	fakultas := getBetween(`<saml:Attribute FriendlyName="fakultas" Name="fakultas" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"><saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">`, "</saml", decodedSamlResponse)
+	fakultas := fmt.Sprintf("Fakultas %s", getBetween(`<saml:Attribute FriendlyName="fakultas" Name="fakultas" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"><saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">`, "</saml", decodedSamlResponse))
 	programStudi := getBetween(`<saml:Attribute FriendlyName="prodi" Name="prodi" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"><saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">`, "</saml", decodedSamlResponse)
 
-	return StudentDetails{nim, fullName, email, fakultas, programStudi}, nil
+	return &StudentDetails{nim, fullName, email, fakultas, programStudi}, nil
 }
 
 func getBetween(start, end, text string) string {

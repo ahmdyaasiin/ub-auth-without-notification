@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -30,7 +29,7 @@ func AuthUB(username, password string) (*StudentDetails, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", "https://brone.ub.ac.id/my/", nil)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to create new request: %v", err)
 	}
 
 	req.Header.Set("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
@@ -51,13 +50,13 @@ func AuthUB(username, password string) (*StudentDetails, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to perform GET request: %v", err)
 	}
 
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
 	r := fmt.Sprintf("%s", respBody)
@@ -75,7 +74,7 @@ func AuthUB(username, password string) (*StudentDetails, error) {
 	data := strings.NewReader(fmt.Sprintf("username=%s&password=%s&credentialId=%s", username, password, ""))
 	req, err = http.NewRequest("POST", fmt.Sprintf("https://iam.ub.ac.id/auth/realms/ub/login-actions/authenticate?session_code=%s&execution=%s&client_id=brone.ub.ac.id&tab_id=%s", sessionCode, execution, tabID), data)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to create POST request: %v", err)
 	}
 
 	req.Header.Set("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
@@ -98,13 +97,13 @@ func AuthUB(username, password string) (*StudentDetails, error) {
 
 	resp, err = client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to perform POST request: %v", err)
 	}
 
 	defer resp.Body.Close()
 	respBody, err = io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
 	r = fmt.Sprintf("%s", respBody)
@@ -122,7 +121,7 @@ func AuthUB(username, password string) (*StudentDetails, error) {
 
 	decodedSamlResponseByte, err := base64.StdEncoding.DecodeString(samlResponse)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to decode SAML response: %v", err)
 	}
 
 	decodedSamlResponse := string(decodedSamlResponseByte)

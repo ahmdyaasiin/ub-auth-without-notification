@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -71,7 +72,7 @@ func AuthUB(username, password string) (*StudentDetails, error) {
 	execution := getBetween("execution=", "&amp", fullURL)
 	tabID := strings.Split(fullURL, "tab_id=")[1]
 
-	data := strings.NewReader(fmt.Sprintf("username=%s&password=%s&credentialId=%s", username, password, ""))
+	data := strings.NewReader(fmt.Sprintf("username=%s&password=%s&credentialId=%s", url.QueryEscape(username), url.QueryEscape(password), ""))
 	req, err = http.NewRequest("POST", fmt.Sprintf("https://iam.ub.ac.id/auth/realms/ub/login-actions/authenticate?session_code=%s&execution=%s&client_id=brone.ub.ac.id&tab_id=%s", sessionCode, execution, tabID), data)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create POST request: %v", err)

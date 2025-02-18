@@ -10,7 +10,7 @@ go mod init module-name
 ```
 Install the library with the command below:
 ```
-go get -u github.com/ahmdyaasiin/ub-auth-without-notification/v2
+go get -u github.com/ahmdyaasiin/ub-auth-without-notification/v3
 ```
 
 ## Quickstart
@@ -19,22 +19,21 @@ Create a new file and copy the code below into the file.
 package main
 
 import (
-    "fmt"
-    u "github.com/ahmdyaasiin/ub-auth-without-notification/v2"
-    "log"
+	"fmt"
+	ub "github.com/ahmdyaasiin/ub-auth-without-notification/v3"
 )
 
 func main() {
-    //
-    resp, err := u.AuthUB("EMAIL_OR_NIM_HERE", "PASSWORD_HERE")
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Println(resp)
+	res, err := ub.Auth("EMAIL_OR_NIM_HERE", "PASSWORD_HERE")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%v\n", res)
 }
+
 ```
 If the email or NIM and password are correct, the output of the file should be as follows:
 ```
-{NIM FullName Email Faculty StudyProgram}
+&{NIM FullName Email Faculty StudyProgram SIAKADPhotoURL FileFILKOMPhotoUrl}
 ```
